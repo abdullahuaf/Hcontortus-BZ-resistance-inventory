@@ -1,7 +1,7 @@
 -- ============================================================
 -- SQL Queries: GenBank-derived global inventory of
 -- benzimidazole resistance markers in H. contortus β-tubulin 1
--- Database: openthis_seq
+-- Database: sequence_analysis
 -- Table: haemonchus_sequences
 -- Authors: Abdullah Azeem, Muhammad Kasib Khan et al.
 -- ============================================================
@@ -12,14 +12,14 @@
 -- ============================================================
 
 -- View all tables
-SHOW TABLES FROM openthis_seq;
+SHOW TABLES FROM sequence_analysis;
 
 -- View full table structure
-DESCRIBE openthis_seq.haemonchus_sequences;
+DESCRIBE sequence_analysis.haemonchus_sequences;
 
 -- Count total sequences
 SELECT COUNT(*) AS total_sequences 
-FROM openthis_seq.haemonchus_sequences;
+FROM sequence_analysis.haemonchus_sequences;
 
 
 -- ============================================================
@@ -28,7 +28,7 @@ FROM openthis_seq.haemonchus_sequences;
 -- ============================================================
 
 -- Assign single mutation flags
-UPDATE openthis_seq.haemonchus_sequences
+UPDATE sequence_analysis.haemonchus_sequences
 SET
   mut_F167Y = CASE
     WHEN sequence_fasta LIKE '%CTTCGTACTCCGTTGT%' THEN 1
@@ -46,7 +46,7 @@ SET
     ELSE NULL END;
 
 -- Assign combination mutation flags
-UPDATE openthis_seq.haemonchus_sequences
+UPDATE sequence_analysis.haemonchus_sequences
 SET
   mut_F167Y_E198A = CASE
     WHEN mut_F167Y = 1 AND mut_E198A = 1 THEN 1
@@ -72,7 +72,7 @@ SET
 
 -- Count sequences excluded due to missing codon coverage
 SELECT COUNT(*) AS excluded_sequences
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 WHERE mut_F167Y IS NULL 
    OR mut_E198A IS NULL 
    OR mut_F200Y IS NULL;
@@ -82,18 +82,18 @@ SELECT
   SUM(CASE WHEN mut_F167Y IS NULL THEN 1 ELSE 0 END) AS missing_codon_167,
   SUM(CASE WHEN mut_E198A IS NULL THEN 1 ELSE 0 END) AS missing_codon_198,
   SUM(CASE WHEN mut_F200Y IS NULL THEN 1 ELSE 0 END) AS missing_codon_200
-FROM openthis_seq.haemonchus_sequences;
+FROM sequence_analysis.haemonchus_sequences;
 
 -- Remove incomplete sequences (backup first!)
 -- CREATE TABLE haemonchus_sequences_backup AS SELECT * FROM haemonchus_sequences;
-DELETE FROM openthis_seq.haemonchus_sequences
+DELETE FROM sequence_analysis.haemonchus_sequences
 WHERE mut_F167Y IS NULL 
    OR mut_E198A IS NULL 
    OR mut_F200Y IS NULL;
 
 -- Verify final retained count
 SELECT COUNT(*) AS final_sequences
-FROM openthis_seq.haemonchus_sequences;
+FROM sequence_analysis.haemonchus_sequences;
 
 
 -- ============================================================
@@ -105,7 +105,7 @@ SELECT
   SUM(CASE WHEN mut_F167Y=1 OR mut_E198A=1 OR mut_F200Y=1 THEN 1 ELSE 0 END) AS total_resistant,
   SUM(CASE WHEN mut_F167Y=0 AND mut_E198A=0 AND mut_F200Y=0 THEN 1 ELSE 0 END) AS total_susceptible,
   ROUND(100.0 * SUM(CASE WHEN mut_F167Y=1 OR mut_E198A=1 OR mut_F200Y=1 THEN 1 ELSE 0 END) / COUNT(*), 1) AS resistance_percent
-FROM openthis_seq.haemonchus_sequences;
+FROM sequence_analysis.haemonchus_sequences;
 
 
 -- ============================================================
@@ -116,37 +116,37 @@ SELECT
   'F200Y'           AS mutation, COUNT(*) AS total,
   SUM(CASE WHEN mut_F200Y=1 THEN 1 ELSE 0 END) AS resistant,
   ROUND(100.0*SUM(CASE WHEN mut_F200Y=1 THEN 1 ELSE 0 END)/COUNT(*),1) AS percent
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 UNION ALL
 SELECT 'F167Y', COUNT(*),
   SUM(CASE WHEN mut_F167Y=1 THEN 1 ELSE 0 END),
   ROUND(100.0*SUM(CASE WHEN mut_F167Y=1 THEN 1 ELSE 0 END)/COUNT(*),1)
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 UNION ALL
 SELECT 'E198A', COUNT(*),
   SUM(CASE WHEN mut_E198A=1 THEN 1 ELSE 0 END),
   ROUND(100.0*SUM(CASE WHEN mut_E198A=1 THEN 1 ELSE 0 END)/COUNT(*),1)
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 UNION ALL
 SELECT 'F167Y + F200Y (double)', COUNT(*),
   SUM(CASE WHEN mut_F167Y_F200Y=1 THEN 1 ELSE 0 END),
   ROUND(100.0*SUM(CASE WHEN mut_F167Y_F200Y=1 THEN 1 ELSE 0 END)/COUNT(*),1)
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 UNION ALL
 SELECT 'F167Y + E198A (double)', COUNT(*),
   SUM(CASE WHEN mut_F167Y_E198A=1 THEN 1 ELSE 0 END),
   ROUND(100.0*SUM(CASE WHEN mut_F167Y_E198A=1 THEN 1 ELSE 0 END)/COUNT(*),1)
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 UNION ALL
 SELECT 'E198A + F200Y (double)', COUNT(*),
   SUM(CASE WHEN mut_E198A_F200Y=1 THEN 1 ELSE 0 END),
   ROUND(100.0*SUM(CASE WHEN mut_E198A_F200Y=1 THEN 1 ELSE 0 END)/COUNT(*),1)
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 UNION ALL
 SELECT 'F167Y + E198A + F200Y (triple)', COUNT(*),
   SUM(CASE WHEN mut_F167Y_E198A_F200Y=1 THEN 1 ELSE 0 END),
   ROUND(100.0*SUM(CASE WHEN mut_F167Y_E198A_F200Y=1 THEN 1 ELSE 0 END)/COUNT(*),1)
-FROM openthis_seq.haemonchus_sequences;
+FROM sequence_analysis.haemonchus_sequences;
 
 
 -- ============================================================
@@ -159,7 +159,7 @@ SELECT
   SUM(CASE WHEN mut_F167Y=1 OR mut_E198A=1 OR mut_F200Y=1 THEN 1 ELSE 0 END) AS resistant,
   SUM(CASE WHEN mut_F167Y=0 AND mut_E198A=0 AND mut_F200Y=0 THEN 1 ELSE 0 END) AS susceptible,
   ROUND(100.0 * SUM(CASE WHEN mut_F167Y=1 OR mut_E198A=1 OR mut_F200Y=1 THEN 1 ELSE 0 END) / COUNT(*), 1) AS resistance_percent
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 GROUP BY collection_year
 ORDER BY collection_year;
 
@@ -172,7 +172,7 @@ ORDER BY collection_year;
 SELECT
   COALESCE(NULLIF(TRIM(source_geo_loc_name), ''), 'Unknown') AS country,
   COUNT(*) AS total_sequences
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 GROUP BY country
 ORDER BY total_sequences DESC;
 
@@ -182,7 +182,7 @@ SELECT
   COUNT(*) AS total_sequences,
   SUM(CASE WHEN mut_F167Y=1 OR mut_E198A=1 OR mut_F200Y=1 THEN 1 ELSE 0 END) AS resistant,
   ROUND(100.0 * SUM(CASE WHEN mut_F167Y=1 OR mut_E198A=1 OR mut_F200Y=1 THEN 1 ELSE 0 END) / COUNT(*), 1) AS resistance_percent
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 GROUP BY country
 HAVING COUNT(*) >= 5
 ORDER BY resistance_percent DESC;
@@ -198,7 +198,7 @@ SELECT
   SUM(CASE WHEN mut_F167Y=1 OR mut_E198A=1 OR mut_F200Y=1 THEN 1 ELSE 0 END) AS resistant,
   SUM(CASE WHEN mut_F167Y=0 AND mut_E198A=0 AND mut_F200Y=0 THEN 1 ELSE 0 END) AS susceptible,
   ROUND(100.0 * SUM(CASE WHEN mut_F167Y=1 OR mut_E198A=1 OR mut_F200Y=1 THEN 1 ELSE 0 END) / COUNT(*), 1) AS resistance_percent
-FROM openthis_seq.haemonchus_sequences
+FROM sequence_analysis.haemonchus_sequences
 GROUP BY host_species
 ORDER BY total DESC;
 
